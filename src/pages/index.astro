@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<title>noCode Human — Build with AI. Stay human.</title>
+<style>
+  :root{
+    --bg:#07080a;
+    --surface:#101111;
+    --surface-2:#16181a;
+    --surface-3:#1b1c1e;
+    --fg:#f9f9f9;
+    --fg-2:#cecece;
+    --muted:#9c9c9d;
+    --muted-2:#6a6b6c;
+    --border:rgba(255,255,255,0.06);
+    --border-strong:rgba(255,255,255,0.10);
+    --accent:#FF6363;
+    --accent-soft:rgba(255,99,99,0.15);
+    --grid:rgba(255,255,255,0.04);
+    --font-sans:-apple-system,BlinkMacSystemFont,"Inter","SF Pro Text","Segoe UI",system-ui,sans-serif;
+    --font-mono:"JetBrains Mono","IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ring: 0 0 0 1px rgb(27,28,30), inset 0 0 0 1px rgb(7,8,10);
+    --key-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -1px 0 rgba(0,0,0,0.5),
+      0 1.5px 0.5px 2.5px rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-feature-settings:"calt","kern","liga","ss03";-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;letter-spacing:0.2px}
+  body{overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  ::selection{background:var(--accent);color:#000}
+
+  /* Layout primitives */
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .row{display:flex;align-items:center;gap:24px}
+  .stack{display:flex;flex-direction:column;gap:24px}
+
+  /* Subtle full-page grid */
+  .canvas{
+    position:relative;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px) 0 0/64px 64px,
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/64px 64px,
+      var(--bg);
+  }
+
+  /* Top nav */
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);background:rgba(7,8,10,0.7);border-bottom:1px solid var(--border)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:0.1px}
+  .brand-mark{
+    width:22px;height:22px;border-radius:6px;
+    background:
+      linear-gradient(135deg, transparent 45%, var(--accent) 45%, var(--accent) 55%, transparent 55%) no-repeat,
+      linear-gradient(135deg, transparent 25%, rgba(255,99,99,0.4) 25%, rgba(255,99,99,0.4) 35%, transparent 35%) no-repeat,
+      linear-gradient(135deg, transparent 65%, rgba(255,99,99,0.4) 65%, rgba(255,99,99,0.4) 75%, transparent 75%) no-repeat,
+      var(--surface-3);
+    box-shadow: var(--ring);
+  }
+  .nav-links{display:flex;gap:28px;font-size:14px;color:var(--muted);font-weight:500}
+  .nav-links a{transition:color .15s ease}
+  .nav-links a:hover{color:var(--fg)}
+  .nav-cta{display:flex;align-items:center;gap:10px}
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    height:36px;padding:0 16px;border-radius:8px;
+    font-size:14px;font-weight:600;letter-spacing:0.3px;
+    border:1px solid var(--border-strong);
+    background:transparent;color:var(--fg);cursor:pointer;
+    transition:opacity .15s ease,transform .15s ease;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.05),
+      inset 0 -1px 0 rgba(0,0,0,0.2),
+      0 1px 2px rgba(0,0,0,0.3);
+  }
+  .btn:hover{opacity:.7}
+  .btn-primary{
+    background:hsla(0,0%,100%,0.92);color:#0a0a0a;border-color:transparent;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.7),
+      inset 0 -1px 0 rgba(0,0,0,0.15),
+      0 4px 14px rgba(255,255,255,0.08);
+  }
+  .btn-primary:hover{background:#fff;opacity:1}
+  .btn-ghost{border-color:transparent;background:transparent;box-shadow:none;color:var(--fg-2)}
+  .btn-ghost:hover{color:var(--fg);opacity:1}
+  .btn-pill{height:34px;border-radius:999px;padding:0 14px;font-size:13px}
+  .btn-lg{height:46px;padding:0 22px;font-size:15px}
+
+  .kbd{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:22px;height:22px;padding:0 6px;
+    border-radius:5px;font-family:var(--font-mono);font-size:11px;font-weight:500;
+    background:linear-gradient(180deg,#1a1a1a,#0d0d0d);
+    color:var(--fg-2);
+    box-shadow: var(--key-shadow);
+  }
+
+  /* Hero */
+  .hero{position:relative;padding:96px 0 80px;overflow:hidden}
+  .hero-stripes-l, .hero-stripes-r{
+    position:absolute;top:0;width:280px;height:100%;
+    pointer-events:none;
+    background-image: repeating-linear-gradient(
+      135deg,
+      var(--accent) 0,
+      var(--accent) 2px,
+      transparent 2px,
+      transparent 14px
+    );
+    opacity:0.34;
+    filter:drop-shadow(0 0 0 rgba(255,99,99,0));
+    animation:stripe-breathe 7s ease-in-out infinite;
+    -webkit-mask-image:linear-gradient(to right, black, transparent);
+            mask-image:linear-gradient(to right, black, transparent);
+  }
+  .hero-stripes-l{left:0;background-position:0 0}
+  .hero-stripes-r{right:0;transform:scaleX(-1);background-position:0 0;animation-delay:-3.5s}
+  @keyframes stripe-breathe{
+    0%,100%{
+      opacity:0.22;
+      background-position:0 0;
+      filter:drop-shadow(0 0 0 rgba(255,99,99,0));
+    }
+    45%{
+      opacity:0.58;
+      background-position:24px -24px;
+      filter:drop-shadow(0 0 18px rgba(255,99,99,0.24));
+    }
+    62%{
+      opacity:0.44;
+      background-position:36px -36px;
+      filter:drop-shadow(0 0 28px rgba(255,99,99,0.16));
+    }
+  }
+  .hero-glow{
+    position:absolute;left:50%;top:60%;transform:translate(-50%,-50%);
+    width:900px;height:600px;border-radius:50%;
+    background:radial-gradient(closest-side, rgba(255,99,99,0.10), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-inner{position:relative;text-align:center;max-width:840px;margin:0 auto}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--font-mono);font-size:11px;font-weight:500;
+    color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;
+    padding:6px 12px;border-radius:999px;border:1px solid var(--border);
+    background:rgba(16,17,17,0.5);
+    margin-bottom:32px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+  .h1{
+    font-size:clamp(44px,7vw,82px);font-weight:600;line-height:1.03;letter-spacing:-0.02em;
+    font-feature-settings:"liga" 0,"ss02","ss08","calt","kern";
+    margin-bottom:24px;
+  }
+  .h1 em{font-style:normal;color:var(--accent);font-feature-settings:"liga" 0,"calt"}
+  .lede{font-size:19px;line-height:1.55;color:var(--fg-2);max-width:620px;margin:0 auto 36px;letter-spacing:0.2px}
+  .hero-ctas{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+  .hero-meta{margin-top:32px;display:flex;justify-content:center;gap:20px;font-size:13px;color:var(--muted)}
+  .hero-meta span{display:inline-flex;align-items:center;gap:8px}
+  .check{width:14px;height:14px;color:var(--accent)}
+
+  /* Premium narrative sections */
+  .feeling{padding:32px 0 88px}
+  .feeling-inner{
+    max-width:980px;
+    margin:0 auto;
+    text-align:center;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:72px 24px;
+  }
+  .feeling h2{
+    font-size:clamp(32px,5vw,58px);
+    line-height:1.06;
+    letter-spacing:-0.02em;
+    font-weight:600;
+  }
+  .feeling p{margin:22px auto 0;max-width:660px;color:var(--fg-2);font-size:18px;line-height:1.55}
+
+  .signature{padding:8px 0 104px}
+  .signature-card{
+    position:relative;
+    min-height:560px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:center;
+    gap:40px;
+    padding:56px;
+    border-radius:18px;
+    background:
+      radial-gradient(closest-side at 70% 45%, rgba(255,99,99,0.11), transparent 70%),
+      linear-gradient(180deg, rgba(255,255,255,0.035), transparent),
+      var(--surface);
+    border:1px solid var(--border);
+    box-shadow:var(--ring), 0 34px 90px -34px rgba(0,0,0,0.8);
+    overflow:hidden;
+  }
+  .signature-copy h2{font-size:42px;line-height:1.08;letter-spacing:-0.02em;font-weight:600;margin-top:12px}
+  .signature-copy p{margin-top:18px;max-width:46ch;color:var(--muted);font-size:16px;line-height:1.65}
+  .signature-visual{display:grid;place-items:center;min-height:360px}
+  .signature .badge-stamp{width:300px;height:300px}
+  .signature .badge-stamp::before{inset:14px}
+  .signature .badge-logo{width:220px;height:220px}
+  .trust-list{display:grid;gap:10px;margin-top:30px;max-width:440px}
+  .trust-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:13px 14px;border-radius:10px;
+    background:rgba(255,255,255,0.035);border:1px solid var(--border);
+    font-size:13px;color:var(--fg-2);
+  }
+  .trust-row span:last-child{font-family:var(--font-mono);color:var(--accent);font-size:12px}
+
+  .apps{padding:32px 0 96px;scroll-margin-top:88px}
+  .apps-head,.blog-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:30px;border-bottom:1px solid var(--border);padding-bottom:14px}
+  .section-title{font-size:32px;font-weight:600;margin-top:8px;letter-spacing:-0.01em;line-height:1.1}
+  .app-placeholder{
+    min-height:320px;
+    padding:36px;
+    border-radius:18px;
+    border:1px dashed rgba(255,99,99,0.32);
+    background:
+      radial-gradient(closest-side at 16% 20%, rgba(255,99,99,0.12), transparent 72%),
+      var(--surface);
+    box-shadow:var(--ring);
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:34px;
+    align-items:center;
+    text-decoration:none;
+    transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  }
+  .app-placeholder:hover{
+    transform:translateY(-2px);
+    border-color:rgba(255,99,99,0.58);
+    background:
+      radial-gradient(closest-side at 16% 20%, rgba(255,99,99,0.16), transparent 72%),
+      var(--surface);
+  }
+  .app-placeholder h3{font-size:34px;line-height:1.1;letter-spacing:-0.01em}
+  .app-placeholder p{margin-top:14px;max-width:56ch;color:var(--muted);font-size:16px;line-height:1.65}
+  .app-icon{
+    width:150px;height:150px;border-radius:32px;
+    display:grid;place-items:center;
+    padding:10px;
+    background:linear-gradient(180deg,#1d2022,#0b0c0e);
+    border:1px solid var(--border-strong);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.08),0 20px 50px rgba(0,0,0,0.45);
+    font-family:var(--font-mono);color:var(--accent);font-size:42px;
+  }
+  .app-icon img{
+    width:100%;
+    height:100%;
+    border-radius:24px;
+    object-fit:cover;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.35),0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  .blog{padding:40px 0 88px;scroll-margin-top:88px}
+  .blog-card{
+    padding:30px 32px;
+    border-radius:16px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:var(--ring);
+    display:flex;justify-content:space-between;gap:24px;align-items:center;
+  }
+  .blog-card h3{font-size:24px;font-weight:600;letter-spacing:-0.01em}
+  .blog-card p{margin-top:8px;color:var(--muted);line-height:1.55}
+
+  /* See it in action */
+  .demo{padding:32px 0 96px;position:relative}
+  .demo-header{display:flex;align-items:end;justify-content:space-between;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:14px}
+  .section-eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase}
+  .demo-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+  .panel{
+    background:var(--surface);
+    border-radius:14px;
+    border:1px solid var(--border);
+    box-shadow: var(--ring), 0 30px 60px -20px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+  .panel-bar{
+    display:flex;align-items:center;gap:8px;
+    padding:11px 14px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  }
+  .traffic{display:flex;gap:6px}
+  .traffic span{width:11px;height:11px;border-radius:50%}
+  .traffic span:nth-child(1){background:#ff5f57}
+  .traffic span:nth-child(2){background:#febc2e}
+  .traffic span:nth-child(3){background:#28c840}
+  .panel-title{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-left:8px}
+  .term{padding:18px 20px;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--fg-2);white-space:pre-wrap;overflow-wrap:anywhere}
+  .term .p{color:var(--muted-2)}
+  .term .c{color:var(--accent)}
+  .term .v{color:#5fc992}
+  .term .b{color:#55b3ff}
+  .term .y{color:#ffbc33}
+  .term .x{color:var(--fg)}
+  .badge-card{padding:28px;display:flex;flex-direction:column;gap:18px;height:100%}
+  .badge-stamp{
+    position:relative;align-self:center;
+    width:160px;height:160px;border-radius:50%;
+    background:
+      radial-gradient(closest-side, rgba(255,99,99,0.18), transparent 70%),
+      conic-gradient(from 90deg, var(--surface-3), var(--surface-2), var(--surface-3));
+    box-shadow: var(--ring), inset 0 0 0 6px rgba(255,99,99,0.06);
+    display:grid;place-items:center;
+  }
+  .badge-stamp::before{
+    content:"";position:absolute;inset:8px;border-radius:50%;
+    border:1px dashed rgba(255,99,99,0.45);
+    animation:spin 36s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .badge-logo{
+    position:relative;z-index:1;
+    width:118px;height:118px;border-radius:50%;
+    object-fit:contain;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      inset 0 -2px 0 rgba(0,0,0,0.4),
+      0 8px 24px rgba(0,0,0,0.55);
+  }
+  .badge-meta{display:flex;flex-direction:column;gap:6px;text-align:center}
+  .badge-meta .h{font-size:16px;font-weight:600}
+  .badge-meta .m{font-size:13px;color:var(--muted);font-family:var(--font-mono)}
+  .badge-rows{display:flex;flex-direction:column;gap:8px;margin-top:auto}
+  .badge-rows .r{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 12px;border-radius:8px;background:var(--surface-2);
+    border:1px solid var(--border);font-size:13px;
+  }
+  .badge-rows .r .label{color:var(--fg-2)}
+  .badge-rows .r .val{font-family:var(--font-mono);color:var(--accent);font-size:12px}
+
+  /* Features */
+  .features{padding:48px 0 96px;scroll-margin-top:88px}
+  .features-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:32px;border-bottom:1px solid var(--border);padding-bottom:14px}
+  .features-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .feat{
+    background:var(--surface);
+    border-radius:16px;
+    border:1px solid var(--border);
+    padding:32px;
+    box-shadow: var(--ring);
+    display:flex;flex-direction:column;gap:24px;
+    min-height:520px;
+  }
+  .feat-eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:var(--font-mono);font-size:11px;font-weight:500;
+    color:var(--accent);letter-spacing:0.4px;text-transform:uppercase;
+  }
+  .feat-eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  .feat-title{font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-0.01em}
+  .feat-body{font-size:15px;color:var(--muted);line-height:1.6;max-width:46ch}
+
+  /* Verified checklist visual */
+  .checklist{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .check-row{
+    display:flex;align-items:center;gap:14px;
+    padding:14px 16px;border-radius:10px;
+    background:var(--surface-2);border:1px solid var(--border);
+    font-size:14px;
+  }
+  .check-box{
+    width:22px;height:22px;border-radius:6px;flex:none;
+    background:linear-gradient(180deg,#1a1c1e,#0d0e10);
+    box-shadow: var(--key-shadow);
+    display:grid;place-items:center;color:var(--accent);
+  }
+  .check-row.done .check-box{background:var(--accent);color:#1a0606;box-shadow:inset 0 1px 0 rgba(255,255,255,0.4),inset 0 -2px 0 rgba(0,0,0,0.25),0 0 14px rgba(255,99,99,0.3)}
+  .check-row.done .label{color:var(--fg)}
+  .check-row .label{flex:1;color:var(--fg-2)}
+  .check-row .step{font-family:var(--font-mono);font-size:11px;color:var(--muted-2)}
+
+  /* Automation flow visual */
+  .flow{margin-top:auto;display:flex;flex-direction:column;gap:8px;font-family:var(--font-mono);font-size:12.5px;line-height:1.6}
+  .flow-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--surface-2);border:1px solid var(--border)}
+  .flow-row .tag{
+    font-size:10px;letter-spacing:0.4px;text-transform:uppercase;
+    padding:3px 7px;border-radius:4px;
+    background:var(--surface-3);color:var(--muted);
+  }
+  .flow-row.evt .tag{color:var(--accent);background:rgba(255,99,99,0.1)}
+  .flow-row.act .tag{color:#5fc992;background:rgba(95,201,146,0.1)}
+  .flow-row.cnd .tag{color:#ffbc33;background:rgba(255,188,51,0.1)}
+  .flow-row .step{color:var(--muted)}
+  .flow-arrow{align-self:center;font-size:14px;color:var(--muted-2);height:8px;line-height:0}
+  .pipeline{
+    margin-top:auto;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:10px;
+  }
+  .pipe-step{
+    position:relative;
+    min-height:116px;
+    padding:14px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:
+      radial-gradient(closest-side at 15% 15%, rgba(255,99,99,0.12), transparent 75%),
+      var(--surface-2);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .pipe-step::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:calc(100% + 1px);
+    width:8px;
+    height:1px;
+    background:rgba(255,99,99,0.45);
+  }
+  .pipe-step:nth-child(3)::after,
+  .pipe-step:last-child::after{display:none}
+  .pipe-num{
+    width:28px;height:28px;border-radius:8px;
+    display:grid;place-items:center;
+    font-family:var(--font-mono);font-size:11px;color:var(--accent);
+    background:rgba(255,99,99,0.10);
+    border:1px solid rgba(255,99,99,0.20);
+  }
+  .pipe-title{font-size:14px;font-weight:600;color:var(--fg)}
+  .pipe-meta{font-size:11px;line-height:1.45;color:var(--muted);font-family:var(--font-mono)}
+
+  /* Testimonials */
+  .quotes{padding:64px 0 96px;border-top:1px solid var(--border)}
+  .quotes-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:32px}
+  .marquee{position:relative;overflow:hidden;mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,black 8%,black 92%,transparent)}
+  .track{display:flex;gap:16px;width:max-content;padding:8px 0}
+  .row-1 .track{animation:scroll-l 60s linear infinite}
+  .row-2 .track{animation:scroll-r 75s linear infinite}
+  .row-3 .track{animation:scroll-l 90s linear infinite}
+  @keyframes scroll-l{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes scroll-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+  .quote{
+    width:380px;flex:none;padding:20px 22px;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow: var(--ring);
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .quote p{font-size:14px;line-height:1.55;color:var(--fg-2)}
+  .quote .who{display:flex;align-items:center;gap:10px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--surface-3);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--accent);font-family:var(--font-mono);box-shadow:var(--ring)}
+  .who .meta{display:flex;flex-direction:column;line-height:1.2}
+  .who .meta .name{font-size:13px;font-weight:500;color:var(--fg)}
+  .who .meta .role{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+  .quote-foot{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--muted-2);letter-spacing:0.3px;text-transform:uppercase}
+  /* Waitlist */
+  .waitlist{padding:80px 0 120px;position:relative;overflow:hidden}
+  .waitlist::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(closest-side at 50% 30%, rgba(255,99,99,0.08), transparent 70%);
+    pointer-events:none;
+  }
+  .waitlist-card{
+    position:relative;
+    max-width:640px;margin:0 auto;
+    padding:48px;text-align:center;
+    background:var(--surface);
+    border-radius:18px;border:1px solid var(--border);
+    box-shadow: var(--ring), 0 30px 60px -20px rgba(0,0,0,0.5);
+  }
+  .waitlist-stripes{
+    position:absolute;inset:0;border-radius:18px;overflow:hidden;pointer-events:none;
+    -webkit-mask-image:radial-gradient(closest-side at 50% 0%, black, transparent 60%);
+            mask-image:radial-gradient(closest-side at 50% 0%, black, transparent 60%);
+  }
+  .waitlist-stripes::before{
+    content:"";position:absolute;inset:-20%;
+    background-image: repeating-linear-gradient(135deg, var(--accent) 0, var(--accent) 1.5px, transparent 1.5px, transparent 12px);
+    opacity:0.25;
+  }
+  .waitlist h2{font-size:36px;font-weight:600;letter-spacing:-0.01em;line-height:1.1;margin-bottom:14px}
+  .waitlist p{font-size:15px;color:var(--muted);margin-bottom:28px;max-width:46ch;margin-left:auto;margin-right:auto;line-height:1.55}
+  .form{display:flex;gap:8px;align-items:center;justify-content:center;max-width:440px;margin:0 auto}
+  .input{
+    flex:1;height:46px;padding:0 16px;
+    background:var(--bg);
+    border:1px solid var(--border-strong);
+    border-radius:10px;
+    color:var(--fg);font-family:var(--font-sans);font-size:14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.3);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  .input:focus{outline:none;border-color:rgba(255,99,99,0.5);box-shadow:0 0 0 3px rgba(255,99,99,0.15), inset 0 1px 0 rgba(255,255,255,0.03)}
+  .input::placeholder{color:var(--muted-2)}
+  .form .btn{height:46px;padding:0 22px;border-radius:10px;font-size:14px}
+  .form .btn[disabled]{cursor:not-allowed;opacity:.72}
+  .waitlist-meta{margin-top:18px;font-family:var(--font-mono);font-size:11px;color:var(--muted-2);letter-spacing:0.3px}
+  .waitlist-status{min-height:16px;margin-top:12px;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .waitlist-status[data-tone="success"]{color:#5fc992}
+  .waitlist-status[data-tone="error"]{color:var(--accent)}
+
+  /* Footer */
+  .foot{border-top:1px solid var(--border);padding:48px 0 32px;color:var(--muted)}
+  .foot-grid{display:grid;grid-template-columns:1.6fr repeat(2, 1fr);gap:32px;margin-bottom:32px}
+  .foot-col h4{font-size:11px;text-transform:uppercase;letter-spacing:0.4px;color:var(--muted-2);font-weight:500;margin-bottom:14px;font-family:var(--font-mono)}
+  .foot-col ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13px}
+  .foot-col a{color:var(--fg-2);transition:color .15s}
+  .foot-col a:hover{color:var(--fg)}
+  .foot-tag{font-size:13px;color:var(--muted);max-width:28ch;line-height:1.55;margin-top:14px}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:center;padding-top:24px;border-top:1px solid var(--border);font-size:12px;font-family:var(--font-mono);color:var(--muted-2);letter-spacing:0.3px}
+
+  /* Responsive */
+  @media (max-width: 980px){
+    .demo-grid{grid-template-columns:1fr}
+    .signature-card,.app-placeholder{grid-template-columns:1fr}
+    .signature-card{padding:36px}
+    .features-grid{grid-template-columns:1fr}
+    .feat{min-height:auto}
+    .foot-grid{grid-template-columns:1fr 1fr}
+    .nav-links{display:none}
+    .hero{padding:72px 0 56px}
+    .hero-stripes-l, .hero-stripes-r{width:140px;opacity:0.3}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero-stripes-l, .hero-stripes-r{animation:none}
+  }
+  @media (max-width:560px){
+    .quote{width:300px}
+    .h1{font-size:42px}
+    .nav-inner{gap:14px}
+    .brand{min-width:0;white-space:nowrap}
+    .nav-cta .btn:not(.btn-primary){display:none}
+    .hero-meta{flex-wrap:wrap;gap:8px 12px;line-height:1.3;padding:0 12px}
+    .demo-header,.features-head,.quotes-head,.apps-head,.blog-head{flex-direction:column;align-items:flex-start;gap:10px}
+    .features-head > .section-eyebrow{max-width:none !important;text-align:left !important}
+    .feeling-inner{padding:52px 0}
+    .signature .badge-stamp{width:230px;height:230px}
+    .signature .badge-logo{width:168px;height:168px}
+    .app-placeholder{padding:26px}
+    .app-icon{width:112px;height:112px;border-radius:24px;font-size:32px}
+    .blog-card{align-items:flex-start;flex-direction:column}
+    .pipeline{grid-template-columns:1fr}
+    .pipe-step::after{display:none}
+    .form{flex-direction:column;gap:10px}
+    .form .input, .form .btn{width:100%}
+    .foot-grid{grid-template-columns:1fr}
+    .waitlist-card{padding:32px 24px}
+    .feat{padding:24px}
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- NAV -->
+  <nav class="nav" data-od-id="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#">
+        <span class="brand-mark"></span>
+        <span>noCode<span style="color:var(--muted)">/</span>Human</span>
+      </a>
+      <div class="nav-links">
+        <a href="#apps">Apps</a>
+        <a href="#templates">Templates</a>
+        <a href="#blog">Blog</a>
+      </div>
+      <div class="nav-cta">
+        <a href="#waitlist" class="btn btn-primary btn-pill">Get verified</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" data-od-id="hero">
+    <div class="hero-stripes-l"></div>
+    <div class="hero-stripes-r"></div>
+    <div class="hero-glow"></div>
+    <div class="wrap hero-inner">
+      <div class="eyebrow"><span class="dot"></span>v0.3 · Public waitlist now open</div>
+      <h1 class="h1">Build with AI.<br/>Stay <em>human</em>.</h1>
+      <p class="lede">AI can draft, clip, code, test, and ship. noCode Human keeps the workflows useful, the automation accountable, and a real person attached to the work.</p>
+      <div class="hero-ctas">
+        <a href="#waitlist" class="btn btn-primary btn-lg">Get verified</a>
+        <a href="#templates" class="btn btn-lg">Browse human-tested templates <span class="kbd">↗</span></a>
+      </div>
+      <div class="hero-meta">
+        <span>Human verification</span>
+        <span>·</span>
+        <span>Automation templates</span>
+        <span>·</span>
+        <span>AI handles the mundane</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEELING -->
+  <section class="feeling wrap" data-od-id="feeling">
+    <div class="feeling-inner">
+      <div class="section-eyebrow" style="color:var(--accent);margin-bottom:18px">Find the feeling</div>
+      <h2>It is not about replacing humans. It is about never wasting them on work that should already be handled.</h2>
+      <p>The noCode Human feeling is calm control: AI clears the errands, builders keep the taste, judgment, and accountability.</p>
+    </div>
+  </section>
+
+  <!-- SIGNATURE VISUAL -->
+  <section class="signature wrap" data-od-id="signature">
+    <div class="signature-card">
+      <div class="signature-copy">
+        <div class="section-eyebrow">// Human verification</div>
+        <h2>A badge for work a real person stands behind.</h2>
+        <p>Show that AI helped without pretending it did not. The badge gives every project a simple human signal: reviewed, owned, and signed off.</p>
+        <div class="trust-list">
+          <div class="trust-row"><span>Identity attested</span><span>github.com/rachel</span></div>
+          <div class="trust-row"><span>Human review completed</span><span>verified</span></div>
+          <div class="trust-row"><span>Public proof</span><span>revocable</span></div>
+        </div>
+      </div>
+      <div class="signature-visual">
+        <div class="badge-stamp">
+          <img class="badge-logo" src="/logo-badge.png" alt="Verified Human badge" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPS -->
+  <section class="apps wrap" id="apps" data-od-id="apps">
+    <div class="apps-head">
+      <div>
+        <div class="section-eyebrow">// 01 — Apps</div>
+        <h2 class="section-title">Purpose-built apps for human-in-the-loop work.</h2>
+      </div>
+      <div class="section-eyebrow" style="color:var(--muted-2);max-width:32ch;text-align:right">One place for the tools that turn AI output into work you can stand behind.</div>
+    </div>
+    <a class="app-placeholder" href="/taptallypro">
+      <div>
+        <div class="feat-eyebrow">Featured app</div>
+        <h3>Tap Tally — Click Counter</h3>
+        <p>Tap Tally is a refined multi-counter for the things that matter, and the ones that don't. Reps. Coffee. Stitches. Headcount. Birds in the garden. Tap a card to count up. Long-press to count down. Done.</p>
+      </div>
+      <div class="app-icon">
+        <img src="/taptallypro/icon.png" alt="Tap Tally app icon" />
+      </div>
+    </a>
+  </section>
+
+  <!-- TEMPLATES -->
+  <section class="features wrap" id="templates" data-od-id="templates">
+    <div class="features-head">
+      <div>
+        <div class="section-eyebrow">// 02 — Templates</div>
+        <h2 style="font-size:32px;font-weight:600;margin-top:8px;letter-spacing:-0.01em;line-height:1.1">Human-tested templates for verified ships.</h2>
+      </div>
+      <div class="section-eyebrow" style="color:var(--muted-2);max-width:32ch;text-align:right">Start from launch patterns that already include disclosure, review, and provenance.</div>
+    </div>
+
+    <div class="features-grid">
+
+      <!-- Short clip workflow agent -->
+      <div class="feat" data-od-id="feat-badge">
+        <span class="feat-eyebrow">A · Short Clip Workflow Agent</span>
+        <div class="stack" style="gap:14px">
+          <h3 class="feat-title">Turn one long-form URL<br/>into a clip pack.</h3>
+          <p class="feat-body">Paste a YouTube, podcast, webinar, or lesson URL. The agent finds the strongest moments, cuts platform-ready shorts, writes captions, and packages everything for review before posting.</p>
+        </div>
+        <div class="checklist">
+          <div class="check-row done">
+            <div class="check-box"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 10 18 19 7"/></svg></div>
+            <span class="label">Pulls source video, transcript, speaker turns</span>
+            <span class="step">01</span>
+          </div>
+          <div class="check-row done">
+            <div class="check-box"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 10 18 19 7"/></svg></div>
+            <span class="label">Finds hooks, payoffs, and clean cut points</span>
+            <span class="step">02</span>
+          </div>
+          <div class="check-row done">
+            <div class="check-box"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 10 18 19 7"/></svg></div>
+            <span class="label">Reframes for TikTok, Reels, Shorts</span>
+            <span class="step">03</span>
+          </div>
+          <div class="check-row done">
+            <div class="check-box"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 10 18 19 7"/></svg></div>
+            <span class="label">Adds captions, titles, descriptions</span>
+            <span class="step">04</span>
+          </div>
+          <div class="check-row done">
+            <div class="check-box"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 13 10 18 19 7"/></svg></div>
+            <span class="label">Exports clips, thumbnails, posting copy</span>
+            <span class="step">05</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- iOS app factory agent -->
+      <div class="feat" data-od-id="feat-automation">
+        <span class="feat-eyebrow">B · iOS App Factory Agent</span>
+        <div class="stack" style="gap:14px">
+          <h3 class="feat-title">Research, build, test,<br/>and launch iOS apps.</h3>
+          <p class="feat-body">A factory pipeline for solo app ideas: validate the market, shape the interface, generate code, run device checks, prepare App Store release assets, and tune monetization.</p>
+        </div>
+        <div class="pipeline">
+          <div class="pipe-step">
+            <span class="pipe-num">01</span>
+            <span class="pipe-title">Research</span>
+            <span class="pipe-meta">market, keywords, comps</span>
+          </div>
+          <div class="pipe-step">
+            <span class="pipe-num">02</span>
+            <span class="pipe-title">Design</span>
+            <span class="pipe-meta">flows, screens, assets</span>
+          </div>
+          <div class="pipe-step">
+            <span class="pipe-num">03</span>
+            <span class="pipe-title">Code</span>
+            <span class="pipe-meta">SwiftUI, data, polish</span>
+          </div>
+          <div class="pipe-step">
+            <span class="pipe-num">04</span>
+            <span class="pipe-title">Testing</span>
+            <span class="pipe-meta">simulator, device, QA</span>
+          </div>
+          <div class="pipe-step">
+            <span class="pipe-num">05</span>
+            <span class="pipe-title">App Store Deploy</span>
+            <span class="pipe-meta">metadata, screenshots, review</span>
+          </div>
+          <div class="pipe-step">
+            <span class="pipe-num">06</span>
+            <span class="pipe-title">Monetization</span>
+            <span class="pipe-meta">pricing, paywalls, tests</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="quotes" data-od-id="testimonials">
+    <div class="wrap quotes-head">
+      <div>
+        <div class="section-eyebrow">// 03 — From the field</div>
+        <h2 style="font-size:32px;font-weight:600;margin-top:8px;letter-spacing:-0.01em;line-height:1.1">What builders are saying.</h2>
+      </div>
+      
+    </div>
+
+    <div class="marquee row-1" data-od-id="row-1">
+      <div class="track">
+        <!-- Set A -->
+        <div class="quote"><p>"The badge feels like a code review crossed with a passport stamp. I trust repos that have one. I trust mine more for having earned one."</p><div class="who"><div class="avatar">MK</div><div class="meta"><span class="name">Mira Kogan</span><span class="role">indie dev · @mira_k</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Finally something that doesn't pretend AI didn't help. Disclosure as a feature, not a fig leaf."</p><div class="who"><div class="avatar">DV</div><div class="meta"><span class="name">Diego Vázquez</span><span class="role">staff eng · series-b SaaS</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"I shipped four side projects last quarter. Three of them have the badge. One doesn't. Guess which one I'm proud of."</p><div class="who"><div class="avatar">AL</div><div class="meta"><span class="name">Adaeze Lin</span><span class="role">design engineer</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"The automation reads like prose. My CI/CD looks less like a hostage situation now."</p><div class="who"><div class="avatar">RT</div><div class="meta"><span class="name">Ravi Tendulkar</span><span class="role">platform lead</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <!-- Set A duplicate -->
+        <div class="quote"><p>"The badge feels like a code review crossed with a passport stamp. I trust repos that have one. I trust mine more for having earned one."</p><div class="who"><div class="avatar">MK</div><div class="meta"><span class="name">Mira Kogan</span><span class="role">indie dev · @mira_k</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Finally something that doesn't pretend AI didn't help. Disclosure as a feature, not a fig leaf."</p><div class="who"><div class="avatar">DV</div><div class="meta"><span class="name">Diego Vázquez</span><span class="role">staff eng · series-b SaaS</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"I shipped four side projects last quarter. Three of them have the badge. One doesn't. Guess which one I'm proud of."</p><div class="who"><div class="avatar">AL</div><div class="meta"><span class="name">Adaeze Lin</span><span class="role">design engineer</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"The automation reads like prose. My CI/CD looks less like a hostage situation now."</p><div class="who"><div class="avatar">RT</div><div class="meta"><span class="name">Ravi Tendulkar</span><span class="role">platform lead</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+      </div>
+    </div>
+
+    <div class="marquee row-2" style="margin-top:16px" data-od-id="row-2">
+      <div class="track">
+        <div class="quote"><p>"The templates are opinionated in a 'someone actually built this' way, not in an 'AI generated this from a thesaurus' way."</p><div class="who"><div class="avatar">SP</div><div class="meta"><span class="name">Sora Park</span><span class="role">founder · two-person studio</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Took me 18 minutes from sign-up to my first verified ship. The checklist is the magic — it's just the work I should've been doing anyway."</p><div class="who"><div class="avatar">JE</div><div class="meta"><span class="name">Jules Ekele</span><span class="role">freelance · prev. Stripe</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"My pull requests have a higher merge rate now. Reviewers see the badge and read the diff with charity instead of suspicion."</p><div class="who"><div class="avatar">YH</div><div class="meta"><span class="name">Yulia Haines</span><span class="role">senior eng · open source</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Less ceremony than Vercel. More accountability than GitHub Actions. A weird, productive sweet spot."</p><div class="who"><div class="avatar">TB</div><div class="meta"><span class="name">Theo Bautista</span><span class="role">solo founder</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"The templates are opinionated in a 'someone actually built this' way, not in an 'AI generated this from a thesaurus' way."</p><div class="who"><div class="avatar">SP</div><div class="meta"><span class="name">Sora Park</span><span class="role">founder · two-person studio</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Took me 18 minutes from sign-up to my first verified ship. The checklist is the magic — it's just the work I should've been doing anyway."</p><div class="who"><div class="avatar">JE</div><div class="meta"><span class="name">Jules Ekele</span><span class="role">freelance · prev. Stripe</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"My pull requests have a higher merge rate now. Reviewers see the badge and read the diff with charity instead of suspicion."</p><div class="who"><div class="avatar">YH</div><div class="meta"><span class="name">Yulia Haines</span><span class="role">senior eng · open source</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Less ceremony than Vercel. More accountability than GitHub Actions. A weird, productive sweet spot."</p><div class="who"><div class="avatar">TB</div><div class="meta"><span class="name">Theo Bautista</span><span class="role">solo founder</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+      </div>
+    </div>
+
+    <div class="marquee row-3" style="margin-top:16px" data-od-id="row-3">
+      <div class="track">
+        <div class="quote"><p>"The first tool that treats 'I used AI for the boring parts' as a feature, not a confession. I exhaled."</p><div class="who"><div class="avatar">CN</div><div class="meta"><span class="name">Clara Nwosu</span><span class="role">research engineer</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Honestly the badge motif alone made me sign up. Then the automation kept me. It's rare to get both."</p><div class="who"><div class="avatar">FO</div><div class="meta"><span class="name">Felix Ostrowski</span><span class="role">DX lead</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"It's the developer-tool I send to friends now instead of explaining what I do all day."</p><div class="who"><div class="avatar">NA</div><div class="meta"><span class="name">Nadia Acosta</span><span class="role">senior IC</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"It's the spiritual successor to a personal site — but it actually proves you ship."</p><div class="who"><div class="avatar">KM</div><div class="meta"><span class="name">Kit Møller</span><span class="role">indie · Copenhagen</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"The first tool that treats 'I used AI for the boring parts' as a feature, not a confession. I exhaled."</p><div class="who"><div class="avatar">CN</div><div class="meta"><span class="name">Clara Nwosu</span><span class="role">research engineer</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"Honestly the badge motif alone made me sign up. Then the automation kept me. It's rare to get both."</p><div class="who"><div class="avatar">FO</div><div class="meta"><span class="name">Felix Ostrowski</span><span class="role">DX lead</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"It's the developer-tool I send to friends now instead of explaining what I do all day."</p><div class="who"><div class="avatar">NA</div><div class="meta"><span class="name">Nadia Acosta</span><span class="role">senior IC</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+        <div class="quote"><p>"It's the spiritual successor to a personal site — but it actually proves you ship."</p><div class="who"><div class="avatar">KM</div><div class="meta"><span class="name">Kit Møller</span><span class="role">indie · Copenhagen</span></div></div><div class="quote-foot"><span>VERIFIED HUMAN</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOG -->
+  <section class="blog wrap" id="blog" data-od-id="blog">
+    <div class="blog-head">
+      <div>
+        <div class="section-eyebrow">// 04 — Blog</div>
+        <h2 class="section-title">Notes on building with AI without disappearing into it.</h2>
+      </div>
+    </div>
+    <div class="blog-card">
+      <div>
+        <h3>Coming soon: the noCode Human field notes.</h3>
+        <p>Short essays on agent workflows, human review, product taste, and what should stay unmistakably yours.</p>
+      </div>
+      <a href="#waitlist" class="btn btn-primary btn-pill">Get notified</a>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section class="waitlist" id="waitlist" data-od-id="waitlist">
+    <div class="wrap">
+      <div class="waitlist-card">
+        <div class="waitlist-stripes"></div>
+        <div class="section-eyebrow" style="display:inline-block;margin-bottom:18px;color:var(--accent)">// 05 — Join the waitlist</div>
+        <h2>Get verified when we open the doors.</h2>
+        <p>Drop your email. We'll send one short note when invites unlock — no drip campaign, no AI-written newsletter. A real human will hit send.</p>
+        <form class="form" id="waitlist-form">
+          <input class="input" name="email" type="email" placeholder="you@domain.com" autocomplete="email" required>
+          <button class="btn btn-primary" type="submit">Join waitlist</button>
+        </form>
+        <div class="waitlist-status" id="waitlist-status" role="status" aria-live="polite"></div>
+        <div class="waitlist-meta">2,841 builders ahead of you</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOT -->
+  <footer class="foot">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-col">
+          <a class="brand" href="#"><span class="brand-mark"></span><span>noCode<span style="color:var(--muted)">/</span>Human</span></a>
+          <p class="foot-tag">Build with AI. Stay human. A home for AI-assisted builders who care what their name is on.</p>
+        </div>
+        <div class="foot-col">
+          <h4>Product</h4>
+          <ul><li><a href="#apps">Apps</a></li><li><a href="#templates">Templates</a></li><li><a href="#waitlist">Get verified</a></li></ul>
+        </div>
+        <div class="foot-col">
+          <h4>Company</h4>
+          <ul><li><a href="#blog">Blog</a></li><li><a href="mailto:hello@nocodehuman.dev">Contact</a></li><li><a href="#">@nocodehuman</a></li></ul>
+        </div>
+      </div>
+      <div class="foot-bottom">
+        <span>© 2026 noCode Human · Made by humans (with help)</span>
+        <span>v0.3.1 · last shipped 2026-05-06</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+<script>
+  import { ConvexHttpClient } from "convex/browser";
+  import { makeFunctionReference } from "convex/server";
+
+  const convexUrl = import.meta.env.PUBLIC_CONVEX_URL;
+  const form = document.querySelector<HTMLFormElement>("#waitlist-form");
+  const status = document.querySelector<HTMLElement>("#waitlist-status");
+  const button = form?.querySelector<HTMLButtonElement>("button");
+  const emailInput = form?.querySelector<HTMLInputElement>("input[name='email']");
+  const joinWaitlist = makeFunctionReference<
+    "mutation",
+    { email: string; source: string },
+    { status: "exists" | "joined" }
+  >("waitlist:join");
+
+  const setStatus = (message: string, tone: "success" | "error" | "muted" = "muted") => {
+    if (!status) return;
+    status.textContent = message;
+    status.dataset.tone = tone;
+  };
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    if (!convexUrl) {
+      setStatus("Missing PUBLIC_CONVEX_URL.", "error");
+      return;
+    }
+
+    if (!emailInput?.value) return;
+
+    button?.setAttribute("disabled", "true");
+    if (button) button.textContent = "Joining...";
+    setStatus("Saving to Convex...");
+
+    try {
+      const client = new ConvexHttpClient(convexUrl);
+      const result = await client.mutation(joinWaitlist, {
+        email: emailInput.value,
+        source: "landing",
+      });
+
+      emailInput.value = "";
+      setStatus(
+        result?.status === "exists" ? "Already on the list." : "You’re on the list.",
+        "success",
+      );
+      if (button) button.textContent = "Joined";
+    } catch (error) {
+      console.error(error);
+      setStatus("Couldn’t join. Try again in a minute.", "error");
+      if (button) button.textContent = "Join waitlist";
+    } finally {
+      button?.removeAttribute("disabled");
+    }
+  });
+</script>
+</body>
+</html>

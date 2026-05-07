@@ -1,0 +1,26 @@
+{
+  "name": "nocode-human-landing",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "convex": "convex dev",
+    "video:studio": "remotion studio src/video/index.ts",
+    "video:render": "remotion render src/video/index.ts NoCodeHumanPromo out/nocode-human-promo.mp4"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@remotion/cli": "^4.0.457",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.2.2",
+    "convex": "^1.37.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.457",
+    "typescript": "^5.9.3"
+  }
+}

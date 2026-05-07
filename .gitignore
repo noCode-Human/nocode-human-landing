@@ -1,0 +1,15 @@
+.vercel
+
+.env.local
+.env
+.env.*.local
+!.env.example
+
+node_modules/
+dist/
+.astro/
+out/
+
+.DS_Store
+.codex-*.png
+npm-debug.log*
