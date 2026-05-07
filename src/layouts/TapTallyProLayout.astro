@@ -7,7 +7,10 @@ interface Props {
   variant?: 'text' | 'promo';
   ogImage?: string;
 }
-const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' } = Astro.props;
+const { title, description, variant = 'text', ogImage = '/taptallypro/og.png' } = Astro.props;
+const site = 'https://nocodehuman.ai';
+const canonicalUrl = new URL(Astro.url.pathname, site).href;
+const absoluteOgImage = new URL(ogImage, site).href;
 ---
 <!doctype html>
 <html lang="en">
@@ -16,10 +19,18 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  <link rel="canonical" href={canonicalUrl} />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
-  <meta property="og:image" content={ogImage} />
+  <meta property="og:image" content={absoluteOgImage} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={absoluteOgImage} />
   <link rel="icon" type="image/png" href="/taptallypro/icon.png" />
   <style is:global>
     :root {
@@ -261,6 +272,66 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
       background: var(--surface);
       border: 1px solid var(--divider);
     }
+    .press-hero {
+      padding-top: 72px;
+      padding-bottom: 12px;
+    }
+    .press-hero h1 {
+      font-size: clamp(48px, 8vw, 82px);
+      margin-bottom: 18px;
+    }
+    .press-hero p {
+      max-width: 640px;
+      color: var(--muted);
+      font-size: 20px;
+    }
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin: 24px 0 36px;
+    }
+    .asset-card {
+      min-height: 150px;
+      padding: 20px;
+      border: 1px solid var(--divider);
+      border-radius: 18px;
+      background: rgba(251, 247, 241, 0.64);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .asset-card:hover { border-color: rgba(194,85,58,0.55); }
+    .asset-card img {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      margin-bottom: 20px;
+    }
+    .asset-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .asset-card span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .link-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0;
+      border-top: 1px solid var(--divider);
+    }
+    .link-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--divider);
+    }
+    .link-list a { word-break: break-word; }
     @media (max-width: 600px) {
       h1 { font-size: 44px; }
       .hero h1 { font-size: 56px; }
@@ -301,10 +372,45 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
     </a>
     <div class="nav-links">
       <a href="/taptallypro">Tap Tally</a>
+      <a href="/taptallypro/press">Press</a>
       <a href="/taptallypro/privacy">Privacy</a>
       <a href="/taptallypro/support">Support</a>
     </div>
   </nav>
   <slot />
+  <script is:inline>
+    const appStoreLinks = {
+      producthunt: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=producthunt&mt=8",
+      hn: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=showhn&mt=8",
+      showhn: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=showhn&mt=8",
+      "hacker-news": "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=showhn&mt=8",
+      hackernews: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=showhn&mt=8",
+      sp: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=reddit-sideproject&mt=8",
+      sideproject: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=reddit-sideproject&mt=8",
+      reddit: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=reddit-sideproject&mt=8",
+      "reddit-sideproject": "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=reddit-sideproject&mt=8",
+      ih: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=indiehackers&mt=8",
+      indiehackers: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=indiehackers&mt=8",
+      x: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=twitter&mt=8",
+      twitter: "https://apps.apple.com/us/app/tap-tally-click-counter/id6767036962?ct=twitter&mt=8"
+    };
+    const params = new URLSearchParams(window.location.search);
+    const rawSource = params.get("source") || params.get("ref") || params.get("utm_source") || params.get("ct");
+    const normalizedSource = rawSource?.toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const referrer = document.referrer.toLowerCase();
+    const inferredSource =
+      normalizedSource ||
+      (referrer.includes("producthunt") && "producthunt") ||
+      (referrer.includes("news.ycombinator") && "hn") ||
+      (referrer.includes("reddit") && "reddit") ||
+      (referrer.includes("indiehackers") && "ih") ||
+      ((referrer.includes("twitter") || referrer.includes("x.com")) && "x");
+    const trackedUrl = appStoreLinks[inferredSource];
+    if (trackedUrl) {
+      document.querySelectorAll('a[href^="https://apps.apple.com/us/app/tap-tally-click-counter/"]').forEach((link) => {
+        link.href = trackedUrl;
+      });
+    }
+  </script>
 </body>
 </html>
