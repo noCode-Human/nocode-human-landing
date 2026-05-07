@@ -18,3 +18,4 @@ npm run build
 ## Waitlist
 
 The waitlist uses Convex. Set `PUBLIC_CONVEX_URL` in local and hosted environments.
+Last Git deploy check: 2026-05-07T01:11:31Z
