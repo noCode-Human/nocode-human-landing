@@ -174,24 +174,80 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
     .faq summary::after { content: "+"; color: var(--accent); font-weight: 400; font-size: 22px; }
     .faq details[open] summary::after { content: "−"; }
     .faq p { margin: 12px 0 0; color: var(--muted); }
-    .hero { text-align: center; padding: 40px 0 24px; }
+    .hero {
+      min-height: clamp(620px, calc(100svh - 94px), 780px);
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(340px, 0.78fr);
+      gap: 56px;
+      align-items: center;
+      padding: 26px 0 36px;
+    }
+    .hero-copy { max-width: 560px; }
     .hero img.icon {
       width: 96px;
       height: 96px;
       border-radius: 22px;
       display: block;
-      margin: 0 auto 24px;
+      margin: 0 0 24px;
     }
-    .hero h1 { font-size: 72px; line-height: 1; margin: 0 0 12px; }
+    .hero h1 { font-size: clamp(68px, 8vw, 106px); line-height: 0.95; margin: 0 0 18px; }
     .hero p.lede {
       font-family: ui-serif, Georgia, "New York", serif;
       font-style: italic;
-      font-size: 22px;
+      font-size: clamp(24px, 2.35vw, 34px);
+      line-height: 1.25;
       color: var(--muted);
-      margin: 0 auto;
-      max-width: 540px;
+      margin: 0;
+      max-width: 620px;
     }
-    .hero .cta { margin-top: 28px; }
+    .hero .cta { margin-top: 32px; }
+    .phone-showcase {
+      display: flex;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+    }
+    .iphone-frame {
+      position: relative;
+      width: min(370px, 34vw);
+      aspect-ratio: 390 / 844;
+      padding: 11px;
+      border-radius: 54px;
+      background:
+        linear-gradient(145deg, #2c2925, #050505 54%, #3a332d);
+      box-shadow:
+        0 42px 90px rgba(84, 60, 44, 0.26),
+        0 16px 32px rgba(31, 31, 31, 0.18),
+        inset 0 0 0 1px rgba(255,255,255,0.16),
+        inset 0 0 0 3px rgba(0,0,0,0.85);
+    }
+    .iphone-frame::before {
+      content: "";
+      position: absolute;
+      z-index: 2;
+      top: 18px;
+      left: 50%;
+      width: 114px;
+      height: 34px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #050505;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.08);
+    }
+    .iphone-screen {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 44px;
+      background: var(--surface);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.22);
+    }
+    .iphone-screen img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
     .shots {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -213,6 +269,28 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
       .nav-links { gap: 14px; flex-wrap: wrap; justify-content: flex-end; }
       .nav-links a { font-size: 13px; }
     }
+    @media (max-width: 860px) {
+      .hero {
+        min-height: auto;
+        grid-template-columns: 1fr;
+        gap: 34px;
+        text-align: center;
+      }
+      .hero-copy { max-width: none; }
+      .hero img.icon { margin: 0 auto 24px; }
+      .hero p.lede { margin: 0 auto; }
+      .phone-showcase { margin: 0 auto; }
+      .iphone-frame { width: min(360px, 88vw); }
+    }
+    @media (max-width: 600px) {
+      .iphone-frame {
+        width: min(330px, 90vw);
+        border-radius: 46px;
+        padding: 9px;
+      }
+      .iphone-screen { border-radius: 38px; }
+      .iphone-frame::before { top: 15px; width: 96px; height: 29px; }
+    }
   </style>
 </head>
 <body class={variant}>
@@ -225,7 +303,6 @@ const { title, description, variant = 'text', ogImage = '/taptallypro/icon.png' 
       <a href="/taptallypro">Tap Tally</a>
       <a href="/taptallypro/privacy">Privacy</a>
       <a href="/taptallypro/support">Support</a>
-      <a class="nav-cta" href="/#waitlist">Get verified</a>
     </div>
   </nav>
   <slot />
