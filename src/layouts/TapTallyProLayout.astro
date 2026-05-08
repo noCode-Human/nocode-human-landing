@@ -216,24 +216,20 @@ const absoluteOgImage = new URL(ogImage, site).href;
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
       margin: 0;
       padding: 0;
     }
     .product-hunt-badge {
-      position: absolute;
-      z-index: 4;
-      left: 50%;
-      bottom: 18px;
-      transform: translate(-50%, 50%);
+      display: inline-block;
+      margin-top: 16px;
       border-radius: 10px;
-      box-shadow: 0 18px 42px rgba(31, 31, 31, 0.24);
+      box-shadow: 0 16px 36px rgba(84, 60, 44, 0.14);
       line-height: 0;
     }
     .product-hunt-badge img {
       display: block;
-      width: 250px;
-      height: 54px;
+      width: 200px;
+      height: auto;
     }
     .iphone-frame {
       position: relative;
@@ -369,6 +365,7 @@ const absoluteOgImage = new URL(ogImage, site).href;
       .hero p.lede { margin: 0 auto; }
       .phone-showcase { margin: 0 auto; }
       .iphone-frame { width: min(360px, 88vw); }
+      .product-hunt-badge { margin-left: auto; margin-right: auto; }
     }
     @media (max-width: 600px) {
       .iphone-frame {
@@ -379,8 +376,8 @@ const absoluteOgImage = new URL(ogImage, site).href;
       .iphone-screen { border-radius: 38px; }
       .iphone-frame::before { top: 15px; width: 96px; height: 29px; }
       .product-hunt-badge {
-        bottom: 12px;
-        transform: translate(-50%, 44%) scale(0.92);
+        transform: scale(0.9);
+        transform-origin: center top;
       }
     }
   </style>
