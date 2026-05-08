@@ -215,8 +215,25 @@ const absoluteOgImage = new URL(ogImage, site).href;
     .phone-showcase {
       display: flex;
       justify-content: center;
+      align-items: center;
+      position: relative;
       margin: 0;
       padding: 0;
+    }
+    .product-hunt-badge {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      bottom: 18px;
+      transform: translate(-50%, 50%);
+      border-radius: 10px;
+      box-shadow: 0 18px 42px rgba(31, 31, 31, 0.24);
+      line-height: 0;
+    }
+    .product-hunt-badge img {
+      display: block;
+      width: 250px;
+      height: 54px;
     }
     .iphone-frame {
       position: relative;
@@ -361,6 +378,10 @@ const absoluteOgImage = new URL(ogImage, site).href;
       }
       .iphone-screen { border-radius: 38px; }
       .iphone-frame::before { top: 15px; width: 96px; height: 29px; }
+      .product-hunt-badge {
+        bottom: 12px;
+        transform: translate(-50%, 44%) scale(0.92);
+      }
     }
   </style>
 </head>
