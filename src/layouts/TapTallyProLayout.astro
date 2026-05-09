@@ -7,7 +7,7 @@ interface Props {
   variant?: 'text' | 'promo';
   ogImage?: string;
 }
-const { title, description, variant = 'text', ogImage = '/taptallypro/og.png' } = Astro.props;
+const { title, description, variant = 'text', ogImage = '/taptallypro/og-v2.png' } = Astro.props;
 const site = 'https://nocodehuman.ai';
 const canonicalUrl = new URL(Astro.url.pathname, site).href;
 const absoluteOgImage = new URL(ogImage, site).href;
