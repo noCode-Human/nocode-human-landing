@@ -215,17 +215,78 @@ const absoluteOgImage = new URL(ogImage, site).href;
       margin: 0;
       padding: 0;
     }
-    .product-hunt-badge {
-      display: inline-block;
-      margin-top: 16px;
-      border-radius: 10px;
-      box-shadow: 0 16px 36px rgba(84, 60, 44, 0.14);
-      line-height: 0;
+    /* Featured-on badges marquee — small, right-to-left infinite scroll */
+    .badges-marquee {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      margin: 28px 0 8px;
+      padding: 10px 0;
+      -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+              mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
     }
-    .product-hunt-badge img {
+    .badges-track {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      width: max-content;
+      animation: badges-scroll 24s linear infinite;
+    }
+    .badges-track:hover { animation-play-state: paused; }
+    @keyframes badges-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .badge-item {
+      display: inline-flex;
+      align-items: center;
+      flex: none;
+      text-decoration: none;
+      transition: opacity .15s ease;
+    }
+    .badge-item:hover { opacity: 0.85; }
+    .badge-item img {
       display: block;
-      width: 200px;
-      height: auto;
+      height: 40px;
+      width: auto;
+    }
+    /* Tiny Startups custom badge — height-matched to other badges */
+    .ts-badge {
+      gap: 10px;
+      padding: 6px 14px 6px 8px;
+      border-radius: 10px;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(#fff, #fff) padding-box,
+                  linear-gradient(90deg, #3525E6, #D81FE0, #22B8F0) border-box;
+      border: 2px solid transparent;
+      color: #0E0B1F;
+      height: 40px;
+    }
+    .ts-badge svg {
+      width: 24px;
+      height: 24px;
+      flex: none;
+    }
+    .ts-badge .ts-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+    }
+    .ts-badge .ts-eyebrow {
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 7.5px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #6A6585;
+    }
+    .ts-badge .ts-name {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .badges-track { animation: none; }
     }
     .iphone-frame {
       position: relative;
@@ -361,7 +422,6 @@ const absoluteOgImage = new URL(ogImage, site).href;
       .hero p.lede { margin: 0 auto; }
       .phone-showcase { margin: 0 auto; }
       .iphone-frame { width: min(360px, 88vw); }
-      .product-hunt-badge { margin-left: auto; margin-right: auto; }
     }
     @media (max-width: 600px) {
       .iphone-frame {
@@ -371,10 +431,6 @@ const absoluteOgImage = new URL(ogImage, site).href;
       }
       .iphone-screen { border-radius: 38px; }
       .iphone-frame::before { top: 15px; width: 96px; height: 29px; }
-      .product-hunt-badge {
-        transform: scale(0.9);
-        transform-origin: center top;
-      }
     }
   </style>
 </head>
